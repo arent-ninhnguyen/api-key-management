@@ -2,13 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { validateApiKey } from '../../lib/api-keys';
+import Link from 'next/link';
+import { validateApiKey, getAndStoreApiKeyDetails } from '../../lib/api-keys';
+import { isApiLimitExceeded } from '../../lib/utils';
 
 export default function Playground() {
   const [apiKey, setApiKey] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationMessage, setValidationMessage] = useState({ text: '', type: '' });
+  const [isLimitExceeded, setIsLimitExceeded] = useState(false);
   const router = useRouter();
+
+  // Check if API limit is exceeded
+  useEffect(() => {
+    setIsLimitExceeded(isApiLimitExceeded());
+  }, []);
 
   // Clear validation message after 3 seconds
   useEffect(() => {
@@ -39,13 +47,12 @@ export default function Playground() {
       const isValid = await validateApiKey(apiKey);
       
       if (isValid) {
-        // Show success message
-        setValidationMessage({
-          text: 'Valid api key, /protected can be accessed',
-          type: 'success'
-        });
-        // Reset form after successful validation
+        // Get key details and store in localStorage
+        await getAndStoreApiKeyDetails(apiKey);
+        
+        // Reset form and redirect to protected page immediately
         setApiKey('');
+        router.push('/protected');
       } else {
         throw new Error('Invalid API key');
       }
@@ -58,6 +65,44 @@ export default function Playground() {
       setIsSubmitting(false);
     }
   };
+
+  // If API limit is exceeded, show an error message
+  if (isLimitExceeded) {
+    return (
+      <div className="min-h-screen p-8 bg-white dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold mb-2">API Playground</h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Validate your API key to check if it can access protected resources.
+            </p>
+          </div>
+          
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-6 rounded-lg text-center">
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600 dark:text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-red-800 dark:text-red-300 mb-2">API Usage Limit Exceeded</h2>
+            <p className="text-red-700 dark:text-red-400 mb-3">
+              You have reached your monthly API request limit. The API Playground feature is currently disabled.
+              Please wait until your limit resets or consider upgrading your plan.
+            </p>
+            <p className="text-red-700 dark:text-red-400 mb-6">
+              Need help? Contact admin at <a href="mailto:ninh.nguye@arentvn.com" className="underline font-medium">ninh.nguye@arentvn.com</a> to renew your API limit.
+            </p>
+            <Link 
+              href="/dashboards" 
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
+            >
+              Return to Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-8 bg-white dark:bg-gray-900">

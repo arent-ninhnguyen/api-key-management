@@ -41,7 +41,7 @@ export default function ApiKeyTable({
   if (apiKeys.length === 0) {
     return (
       <div className="text-center py-10">
-        <p className="text-gray-500 dark:text-gray-400">No API keys found. Create your first one by clicking the "+" button above.</p>
+        <p className="text-gray-500 dark:text-gray-400">No API keys found. Create your first one by clicking the &quot;+&quot; button above.</p>
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function ApiKeyTable({
                   <button
                     onClick={() => toggleKeyVisibility(key.id)}
                     className={`${visibleKeys[key.id] ? 'text-blue-500' : 'text-gray-400'} hover:text-gray-600 dark:hover:text-gray-300`}
-                    title={visibleKeys[key.id] ? "Hide key" : "View key"}
+                    title={visibleKeys[key.id] ? 'Hide key' : 'View key'}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />

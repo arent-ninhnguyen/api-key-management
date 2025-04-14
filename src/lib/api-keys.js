@@ -130,4 +130,44 @@ export function generateApiKey() {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
+}
+
+/**
+ * Get API key details and store in localStorage
+ * @param {string} keyValue - The API key value
+ * @returns {Promise<Object|null>} - The API key details or null if not found
+ */
+export async function getAndStoreApiKeyDetails(keyValue) {
+  if (!keyValue || keyValue.trim() === '') {
+    return null;
+  }
+
+  // Query the database to find the key details
+  const { data, error } = await supabase
+    .from('api_keys')
+    .select('*')
+    .eq('key', keyValue)
+    .eq('status', 'Active')
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error getting API key details:', error);
+    throw error;
+  }
+  
+  // If key doesn't exist or is not active
+  if (!data) {
+    return null;
+  }
+  
+  // Store in localStorage for the protected page
+  localStorage.setItem('validApiKey', JSON.stringify(data));
+  
+  // Update usage count
+  await supabase
+    .from('api_keys')
+    .update({ usage: data.usage + 1 })
+    .eq('id', data.id);
+  
+  return data;
 } 

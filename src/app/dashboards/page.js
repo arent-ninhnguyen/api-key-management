@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ApiKeyTable from '../components/ApiKeyTable';
 import ApiKeyModal from '../components/ApiKeyModal';
@@ -8,6 +8,7 @@ import Toast from '../components/Toast';
 import UsageStats from '../components/UsageStats';
 import useApiKeys from '../hooks/useApiKeys';
 import useToast from '../hooks/useToast';
+import { storeApiUsage } from '../../lib/utils';
 
 export default function Dashboard() {
   // Use custom hooks
@@ -35,7 +36,14 @@ export default function Dashboard() {
   });
 
   // Constants
-  const usageLimit = 1000;
+  const usageLimit = 300;
+  const totalUsage = getTotalUsage();
+  const isLimitExceeded = totalUsage >= usageLimit;
+
+  // Store usage data in localStorage for other components to use
+  useEffect(() => {
+    storeApiUsage(totalUsage, usageLimit);
+  }, [totalUsage, usageLimit]);
 
   // Handlers
   const handleCreateKey = () => {
@@ -133,8 +141,9 @@ export default function Dashboard() {
 
         {/* Usage Stats */}
         <UsageStats 
-          totalUsage={getTotalUsage()} 
+          totalUsage={totalUsage} 
           usageLimit={usageLimit} 
+          isLimitExceeded={isLimitExceeded}
         />
 
         {/* API Keys Section */}
