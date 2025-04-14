@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -16,6 +16,13 @@ export default function Dashboard() {
   const [currentKey, setCurrentKey] = useState(null);
   const [formData, setFormData] = useState({ name: '', key: '', usageLimit: false, limitValue: 1000 });
   const [visibleKeys, setVisibleKeys] = useState({});
+  const keyNameInputRef = useRef(null);
+
+  useEffect(() => {
+    if (showModal && keyNameInputRef.current) {
+      keyNameInputRef.current.focus();
+    }
+  }, [showModal]);
 
   const handleCreateKey = () => {
     setCurrentKey(null);
@@ -99,12 +106,6 @@ export default function Dashboard() {
         limitValue: formData.limitValue
       };
       setApiKeys([...apiKeys, newKey]);
-      
-      // Show the newly created key
-      setVisibleKeys(prev => ({
-        ...prev,
-        [newKey.id]: true
-      }));
     }
     setShowModal(false);
   };
@@ -269,6 +270,7 @@ export default function Dashboard() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md"
                   placeholder="Key Name"
+                  ref={keyNameInputRef}
                 />
               </div>
               
@@ -291,7 +293,7 @@ export default function Dashboard() {
                   value={formData.limitValue}
                   onChange={(e) => setFormData({ ...formData, limitValue: parseInt(e.target.value) })}
                   disabled={!formData.usageLimit}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white"
+                  className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md ${formData.usageLimit ? 'bg-white dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}
                 />
                 
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
