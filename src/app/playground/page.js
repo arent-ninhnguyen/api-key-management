@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { validateApiKey } from '../../lib/api-keys';
+import { validateApiKey, getAndStoreApiKeyDetails } from '../../lib/api-keys';
 
 export default function Playground() {
   const [apiKey, setApiKey] = useState('');
@@ -39,13 +39,12 @@ export default function Playground() {
       const isValid = await validateApiKey(apiKey);
       
       if (isValid) {
-        // Show success message
-        setValidationMessage({
-          text: 'Valid api key, /protected can be accessed',
-          type: 'success'
-        });
-        // Reset form after successful validation
+        // Get key details and store in localStorage
+        await getAndStoreApiKeyDetails(apiKey);
+        
+        // Reset form and redirect to protected page immediately
         setApiKey('');
+        router.push('/protected');
       } else {
         throw new Error('Invalid API key');
       }
