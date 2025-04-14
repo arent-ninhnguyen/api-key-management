@@ -41,7 +41,7 @@ export default function ApiKeyTable({
   if (apiKeys.length === 0) {
     return (
       <div className="text-center py-10">
-        <p className="text-gray-500 dark:text-gray-400">No API keys found. Create your first one by clicking the "+" button above.</p>
+        <p className="text-gray-500 dark:text-gray-400">No API keys found. Create your first one by clicking the &quot;+&quot; button above.</p>
       </div>
     );
   }
