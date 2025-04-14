@@ -17,7 +17,7 @@ export default function UsageStats({ totalUsage, usageLimit }) {
       </div>
       
       <div className="text-sm mb-8 leading-relaxed pl-4" style={{ maxWidth: "80%" }}>
-        <p className="mb-2">Your plan's API request limit resets monthly.</p>
+        <p className="mb-2">Your plan&apos;s API request limit resets monthly.</p>
         <p>This tracks how many API calls have been made with your keys. Exceeding your limit may result in rate limiting or additional charges.</p>
       </div>
       
@@ -36,7 +36,7 @@ export default function UsageStats({ totalUsage, usageLimit }) {
               {showLimitTooltip && (
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
                   <div className="relative">
-                    <p>Your plan's API request limit resets monthly. This tracks how many API calls have been made with your keys. Exceeding your limit may result in rate limiting or additional charges.</p>
+                    <p>Your plan&apos;s API request limit resets monthly. This tracks how many API calls have been made with your keys. Exceeding your limit may result in rate limiting or additional charges.</p>
                     <div className="absolute w-3 h-3 bg-gray-900 transform rotate-45 left-1/2 -translate-x-1/2 -bottom-1.5"></div>
                   </div>
                 </div>

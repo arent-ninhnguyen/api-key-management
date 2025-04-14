@@ -67,7 +67,7 @@ export default function ApiKeyModal({
             />
             
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              * If the combined usage of all your keys exceeds your plan's limit, all requests will be rejected.
+              * If the combined usage of all your keys exceeds your plan{'\''}s limit, all requests will be rejected.
             </p>
           </div>
         </div>
