@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [formData, setFormData] = useState({ name: '', key: '', usageLimit: false, limitValue: 1000 });
   const [visibleKeys, setVisibleKeys] = useState({});
   const keyNameInputRef = useRef(null);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   // Fetch API keys on component mount
   useEffect(() => {
@@ -37,6 +38,16 @@ export default function Dashboard() {
       keyNameInputRef.current.focus();
     }
   }, [showModal]);
+
+  // Auto-hide toast after 3 seconds
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast({ show: false, message: '', type: 'success' });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleCreateKey = () => {
     setCurrentKey(null);
@@ -71,9 +82,20 @@ export default function Dashboard() {
         delete newVisibleKeys[id];
         setVisibleKeys(newVisibleKeys);
       }
+      
+      // Show success toast with delete type
+      setToast({
+        show: true,
+        message: 'API key deleted successfully',
+        type: 'delete'
+      });
     } catch (err) {
       console.error('Failed to delete API key:', err);
-      alert('Failed to delete API key. Please try again later.');
+      setToast({
+        show: true,
+        message: 'Failed to delete API key. Please try again later.',
+        type: 'error'
+      });
     }
   };
 
@@ -87,7 +109,11 @@ export default function Dashboard() {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
       .then(() => {
-        alert('API key copied to clipboard');
+        setToast({ 
+          show: true, 
+          message: 'Copied API Key to clipboard',
+          type: 'success'
+        });
       })
       .catch(err => {
         console.error('Error copying text: ', err);
@@ -107,6 +133,13 @@ export default function Dashboard() {
         setApiKeys(apiKeys.map(key => 
           key.id === currentKey.id ? { ...updatedKey } : key
         ));
+        
+        // Show success toast for update
+        setToast({
+          show: true,
+          message: 'API key updated successfully',
+          type: 'success'
+        });
       } else {
         // Create new key
         const newKey = await createApiKey({
@@ -117,11 +150,35 @@ export default function Dashboard() {
         });
         
         setApiKeys([newKey, ...apiKeys]);
+        
+        // Show success toast for creation
+        setToast({
+          show: true,
+          message: 'New API key created successfully',
+          type: 'success'
+        });
       }
       setShowModal(false);
     } catch (err) {
       console.error('Failed to save API key:', err);
-      alert('Failed to save API key. Please try again later.');
+      setToast({
+        show: true,
+        message: 'Failed to save API key. Please try again later.',
+        type: 'error'
+      });
+    }
+  };
+
+  // Get toast background color based on type
+  const getToastBgColor = () => {
+    switch (toast.type) {
+      case 'delete':
+        return 'bg-red-600';
+      case 'error':
+        return 'bg-red-600';
+      case 'success':
+      default:
+        return 'bg-green-600';
     }
   };
 
@@ -145,6 +202,24 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
+
+        {/* Toast notification */}
+        {toast.show && (
+          <div className={`fixed top-4 right-4 flex items-center ${getToastBgColor()} text-white px-4 py-3 rounded-md shadow-md z-50`}>
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <p>{toast.message}</p>
+            <button 
+              onClick={() => setToast({ show: false, message: '', type: 'success' })}
+              className="ml-4 text-white"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {/* Current Plan Card with Gradient */}
         <div className="rounded-lg overflow-hidden mb-10 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 p-8 text-white">
