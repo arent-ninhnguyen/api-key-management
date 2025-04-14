@@ -85,6 +85,42 @@ export async function deleteApiKey(id) {
 }
 
 /**
+ * Validate an API key
+ * @param {string} apiKey - The API key to validate
+ * @returns {Promise<boolean>} - Whether the key is valid
+ */
+export async function validateApiKey(apiKey) {
+  if (!apiKey || apiKey.trim() === '') {
+    return false;
+  }
+
+  // Query the database to find the key
+  const { data, error } = await supabase
+    .from('api_keys')
+    .select('id, status, usage, limit_value, usage_limit')
+    .eq('key', apiKey)
+    .eq('status', 'Active')  // Only find active keys
+    .maybeSingle();  // Returns null if not found instead of empty array
+  
+  if (error) {
+    console.error('Error validating API key:', error);
+    throw error;
+  }
+  
+  // If key doesn't exist or is not active
+  if (!data) {
+    return false;
+  }
+  
+  // Check if the key has hit its usage limit
+  if (data.usage_limit && data.usage >= data.limit_value) {
+    return false;
+  }
+  
+  return true;
+}
+
+/**
  * Generate a random API key
  */
 export function generateApiKey() {
