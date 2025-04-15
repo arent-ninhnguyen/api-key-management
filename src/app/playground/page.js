@@ -148,6 +148,7 @@ export default function Playground() {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md"
                 placeholder="Enter your API key here"
                 disabled={isSubmitting}
+                data-cy="api-key-input"
               />
             </div>
             
@@ -158,6 +159,7 @@ export default function Playground() {
                 className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
                 }`}
+                data-cy="validate-key-button"
               >
                 {isSubmitting ? (
                   <>

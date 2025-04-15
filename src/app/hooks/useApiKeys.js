@@ -28,8 +28,27 @@ export default function useApiKeys() {
     }
   };
 
+  // Validate API key data
+  const validateKeyData = (keyData) => {
+    if (!keyData.name || !keyData.name.trim()) {
+      return { isValid: false, error: 'Key name is required' };
+    }
+    
+    if (keyData.usageLimit && (keyData.limitValue <= 0 || isNaN(keyData.limitValue))) {
+      return { isValid: false, error: 'Usage limit must be a positive number' };
+    }
+    
+    return { isValid: true };
+  };
+
   // Create a new API key
   const addApiKey = async (keyData) => {
+    // Validate the data first
+    const validation = validateKeyData(keyData);
+    if (!validation.isValid) {
+      return { success: false, error: validation.error };
+    }
+    
     try {
       const newKey = await createApiKey({
         name: keyData.name,
@@ -48,6 +67,12 @@ export default function useApiKeys() {
 
   // Update an existing API key
   const editApiKey = async (id, keyData) => {
+    // Validate the data first
+    const validation = validateKeyData(keyData);
+    if (!validation.isValid) {
+      return { success: false, error: validation.error };
+    }
+    
     try {
       const updatedKey = await updateApiKey(id, {
         name: keyData.name,

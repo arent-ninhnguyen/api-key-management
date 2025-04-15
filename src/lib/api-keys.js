@@ -21,6 +21,11 @@ export async function getApiKeys() {
  * Create a new API key
  */
 export async function createApiKey({ name, key, usageLimit, limitValue }) {
+  // Server-side validation for usage limit
+  if (usageLimit && (limitValue <= 0 || isNaN(limitValue))) {
+    throw new Error('Usage limit must be a positive number');
+  }
+
   const { data, error } = await supabase
     .from('api_keys')
     .insert([
@@ -48,6 +53,11 @@ export async function createApiKey({ name, key, usageLimit, limitValue }) {
  * Update an existing API key
  */
 export async function updateApiKey(id, { name, usageLimit, limitValue }) {
+  // Server-side validation for usage limit
+  if (usageLimit && (limitValue <= 0 || isNaN(limitValue))) {
+    throw new Error('Usage limit must be a positive number');
+  }
+  
   const { data, error } = await supabase
     .from('api_keys')
     .update({ 
