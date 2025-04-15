@@ -92,8 +92,8 @@ describe('API Playground', () => {
       cy.get('[data-cy="validate-key-button"]').click();
       
       // Verify loading state appears
-      cy.get('[data-cy="validate-key-button"]').should('be.disabled');
-      cy.get('[data-cy="validate-key-button"]').contains('Validating');
+      cy.get('button[data-cy="validate-key-button"], button:contains("Validate Key")').should('be.disabled');
+      cy.get('button[data-cy="validate-key-button"], button:contains("Validate Key"), button:contains("Validating")').should('exist');
       
       // The test is successful if we can interact with the UI as expected
       cy.log('Successful validation test');

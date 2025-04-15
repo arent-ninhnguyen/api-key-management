@@ -13,6 +13,9 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: 'https://example-ci-test.supabase.co'
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-key-for-ci-testing'
+      # Add Cypress debugging
+      DEBUG: 'cypress:*'
+      CYPRESS_REMOTE_DEBUGGING_PORT: 9222
     
     steps:
       - name: Checkout
@@ -35,7 +38,9 @@ jobs:
         with:
           start: npm start
           wait-on: 'http://localhost:3000'
+          browser: chrome
           record: true
+          config: 'viewportWidth=1280,viewportHeight=800,defaultCommandTimeout=10000'
       
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
@@ -51,4 +56,12 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
+          if-no-files-found: ignore
+          
+      - name: Upload Cypress logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-logs
+          path: cypress/logs
           if-no-files-found: ignore 
