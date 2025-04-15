@@ -9,6 +9,84 @@ A dashboard for managing API keys with Supabase integration.
 - Track API key usage
 - Secure key storage with Supabase
 
+## Project Specification
+
+### Overview
+This application provides a comprehensive solution for managing API keys with advanced features for tracking usage, setting limits, and secure validation. It's built with a modern frontend architecture using Next.js and integrates with Supabase for backend functionality.
+
+### Core Components
+
+#### 1. Dashboard
+- **API Key Statistics**: Displays total keys, active keys, and API usage metrics
+- **API Key Table**: Lists all keys with details including name, status, usage, and creation date
+- **Usage Visualization**: Shows current usage compared to limits with appropriate warning indicators
+- **Responsive Design**: Adapts to desktop, tablet, and mobile viewports
+
+#### 2. API Key Management
+- **Create Modal**: Form to create new API keys with name and optional usage limits
+- **Edit Modal**: Update existing keys, modify names and usage limits
+- **Delete Confirmation**: Safe deletion with confirmation dialog
+- **Copy Functionality**: One-click copy to clipboard with feedback
+
+#### 3. API Key Validation
+- **Playground Interface**: Test environment for validating API keys
+- **Real-time Validation**: Immediate feedback on key validity
+- **Error Handling**: Clear error messages for invalid keys
+- **Usage Tracking**: Increments usage count when keys are validated
+
+#### 4. Security Features
+- **Secure Storage**: Keys stored securely in Supabase with encryption
+- **Usage Limits**: Prevent abuse by setting and enforcing usage caps
+- **User-specific Keys**: Each user can only access their own API keys
+- **Validation Safeguards**: Rate limiting and protection against brute-force attempts
+
+### Technical Implementation
+
+#### Frontend
+- **React Components**: Modular design with reusable components
+- **State Management**: Context API for application state
+- **Styling**: Tailwind CSS for responsive, utility-first styling
+- **Forms**: Validation with client-side error handling
+- **Animations**: Smooth transitions and loading states
+
+#### Backend Integration
+- **Supabase API**: REST endpoints for CRUD operations
+- **Authentication**: User-specific data access with row-level security
+- **Data Structure**: Optimized schema for API key management
+- **Error Handling**: Comprehensive error states with user-friendly messages
+
+#### Testing
+- **Cypress Tests**: End-to-end testing for all key functionality
+- **Test Coverage**: Dashboard views, API key operations, and playground validation
+- **Mock Data**: Simulated API responses for consistent testing
+- **Edge Cases**: Testing for limit conditions, errors, and validation scenarios
+
+### User Workflows
+
+1. **Creating an API Key**:
+   - User navigates to dashboard
+   - Clicks "Create API Key" button
+   - Enters key name and optional usage limit
+   - Receives generated API key with option to copy
+
+2. **Validating an API Key**:
+   - User navigates to playground
+   - Enters API key in validation field
+   - Submits for validation
+   - Receives success confirmation or error message
+
+3. **Managing Usage Limits**:
+   - User monitors key usage through dashboard
+   - Receives warnings when approaching limits
+   - Can edit keys to adjust limits as needed
+   - Dashboard shows exceeded limits with visual indicators
+
+4. **Deleting an API Key**:
+   - User selects key to delete
+   - Confirms deletion intent
+   - Receives confirmation of successful deletion
+   - Dashboard updates to reflect changes
+
 ## Setup Instructions
 
 ### 1. Supabase Setup

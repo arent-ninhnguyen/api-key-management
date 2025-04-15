@@ -23,7 +23,7 @@ Cypress.Commands.add('setAuth', () => {
 Cypress.Commands.add('mockApiKeys', () => {
   cy.intercept('GET', '**/rest/v1/api_keys**', {
     statusCode: 200,
-    fixture: 'api-keys.json'
+    fixture: 'apiKeys.json'
   }).as('getApiKeys');
 });
 

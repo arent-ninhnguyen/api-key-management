@@ -36,7 +36,7 @@ export default function Dashboard() {
   });
 
   // Constants
-  const usageLimit = 1000;
+  const usageLimit = 100000;
   const totalUsage = getTotalUsage();
   const isLimitExceeded = totalUsage >= usageLimit;
 
@@ -89,6 +89,7 @@ export default function Dashboard() {
   };
 
   const handleSaveKey = async () => {
+    // Logic is now handled by the ApiKeyModal's validateForm function
     let result;
 
     if (currentKey) {
@@ -97,6 +98,7 @@ export default function Dashboard() {
       
       if (result.success) {
         showToast('API key updated successfully', 'success');
+        setShowModal(false);
       } else {
         showToast(result.error, 'error');
       }
@@ -106,13 +108,10 @@ export default function Dashboard() {
       
       if (result.success) {
         showToast('New API key created successfully', 'success');
+        setShowModal(false);
       } else {
         showToast(result.error, 'error');
       }
-    }
-
-    if (result.success) {
-      setShowModal(false);
     }
   };
 
