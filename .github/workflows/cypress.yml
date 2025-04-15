@@ -33,15 +33,18 @@ jobs:
           record: false
       
       - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
+          if-no-files-found: ignore
       
-      - name: Upload videos
-        uses: actions/upload-artifact@v3
-        if: always()
+      # Only upload videos on failure to reduce artifacts size
+      - name: Upload videos on failure
+        uses: actions/upload-artifact@v2
+        if: failure()
         with:
           name: cypress-videos
-          path: cypress/videos 
+          path: cypress/videos
+          if-no-files-found: ignore 
