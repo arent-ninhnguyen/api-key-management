@@ -41,6 +41,7 @@ export default function ApiKeyModal({
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md"
               placeholder="Key Name"
               ref={keyNameInputRef}
+              data-cy="api-key-name"
             />
           </div>
           
@@ -52,6 +53,7 @@ export default function ApiKeyModal({
                 checked={formData.usageLimit}
                 onChange={(e) => setFormData({ ...formData, usageLimit: e.target.checked })}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                data-cy="usage-limit-checkbox"
               />
               <label htmlFor="limitUsage" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                 Limit monthly usage*
@@ -64,6 +66,7 @@ export default function ApiKeyModal({
               onChange={(e) => setFormData({ ...formData, limitValue: parseInt(e.target.value) })}
               disabled={!formData.usageLimit}
               className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md ${formData.usageLimit ? 'bg-white dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}
+              data-cy="usage-limit-value"
             />
             
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -76,12 +79,14 @@ export default function ApiKeyModal({
           <button
             onClick={onSave}
             className="px-6 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+            data-cy="save-key-button"
           >
             {isEditing ? 'Update' : 'Create'}
           </button>
           <button
             onClick={onClose}
             className="px-6 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+            data-cy="cancel-button"
           >
             Cancel
           </button>

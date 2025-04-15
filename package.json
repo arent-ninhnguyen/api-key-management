@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cypress": "cypress open",
+    "test": "cypress run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
@@ -17,6 +19,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/cypress": "^10.0.3",
+    "cypress": "^14.3.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
     "tailwindcss": "^4"

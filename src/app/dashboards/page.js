@@ -36,7 +36,7 @@ export default function Dashboard() {
   });
 
   // Constants
-  const usageLimit = 300;
+  const usageLimit = 1000;
   const totalUsage = getTotalUsage();
   const isLimitExceeded = totalUsage >= usageLimit;
 

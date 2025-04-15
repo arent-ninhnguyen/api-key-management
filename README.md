@@ -121,3 +121,72 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## E2E Testing with Cypress
+
+This project uses Cypress for end-to-end testing. The tests verify the functionality of the API key management features, dashboard, and playground.
+
+### Prerequisites
+
+- Node.js 14+ installed
+- Project dependencies installed (`npm install`)
+
+### Running the Tests
+
+1. **Start the development server in one terminal:**
+
+```bash
+npm run dev
+```
+
+2. **Run Cypress tests in another terminal:**
+
+To open Cypress interactive test runner:
+```bash
+npm run cypress
+```
+
+To run tests in headless mode:
+```bash
+npm run test
+```
+
+### Test Structure
+
+The test suite is organized as follows:
+
+- **API Key Management Tests**: Test creation, deletion, and validation of API keys
+- **Dashboard Tests**: Test the display of statistics and navigation
+- **Playground Tests**: Test validation of API keys and protected content
+
+### Mock Data
+
+The tests use mock data and mock Supabase responses to simulate API interactions without requiring a real backend.
+
+### CI/CD Integration
+
+To run these tests in a CI/CD pipeline, you can use the following GitHub Actions workflow:
+
+```yaml
+name: Cypress Tests
+on: [push]
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Next.js
+        run: npm run build
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          start: npm start
+          wait-on: 'http://localhost:3000'
+```
