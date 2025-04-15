@@ -209,6 +209,22 @@ This project uses Cypress for end-to-end testing. The tests verify the functiona
 - Node.js 14+ installed
 - Project dependencies installed (`npm install`)
 
+### Folder Structure
+
+The Cypress tests follow the standard Cypress directory structure:
+
+```
+/cypress
+  /e2e              - Test files organized by feature
+    - api-keys.cy.js    - Tests for API key management
+    - dashboard.cy.js   - Tests for dashboard functionality
+    - playground.cy.js  - Tests for API key validation
+  /fixtures         - Mock data used in tests
+  /support          - Test helpers and custom commands
+  /screenshots      - Saved automatically when tests fail
+  /videos           - Recordings of test runs
+```
+
 ### Running the Tests
 
 1. **Start the development server in one terminal:**
@@ -229,28 +245,45 @@ To run tests in headless mode:
 npm run test
 ```
 
+To run a specific test file:
+```bash
+npx cypress run --spec "cypress/e2e/playground.cy.js"
+```
+
 ### Test Structure
 
 The test suite is organized as follows:
 
-- **API Key Management Tests**: Test creation, deletion, and validation of API keys
-- **Dashboard Tests**: Test the display of statistics and navigation
-- **Playground Tests**: Test validation of API keys and protected content
+- **API Key Management Tests** (`api-keys.cy.js`): Test creation, deletion, and validation of API keys
+- **Dashboard Tests** (`dashboard.cy.js`): Test the display of statistics and navigation
+- **Playground Tests** (`playground.cy.js`): Test validation of API keys and protected content
 
 ### Mock Data
 
-The tests use mock data and mock Supabase responses to simulate API interactions without requiring a real backend.
+The tests use mock data and custom commands to simulate API interactions:
 
-### CI/CD Integration
+- Fixtures in `cypress/fixtures/apiKeys.json` provide consistent test data
+- Custom commands in `cypress/support/commands.js` mock API responses
+- localStorage manipulation is used to test state-dependent features
 
-To run these tests in a CI/CD pipeline, you can use the following GitHub Actions workflow:
+### GitHub Actions CI Integration
+
+This project includes GitHub Actions workflow for continuous integration:
 
 ```yaml
 name: Cypress Tests
-on: [push]
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: 'https://example-ci-test.supabase.co'
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'mock-key-for-ci-testing'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -268,3 +301,5 @@ jobs:
           start: npm start
           wait-on: 'http://localhost:3000'
 ```
+
+The workflow automatically runs tests on pushes to main branches and provides screenshots and videos for any failing tests.
