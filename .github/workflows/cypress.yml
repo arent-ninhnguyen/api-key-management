@@ -31,20 +31,21 @@ jobs:
           start: npm start
           wait-on: 'http://localhost:3000'
           record: false
-      
-      - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-      
-      # Only upload videos on failure to reduce artifacts size
-      - name: Upload videos on failure
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: cypress-videos
-          path: cypress/videos
-          if-no-files-found: ignore 
+
+      # Optional: If you want to try with the latest version
+      # Uncomment these if needed after initial successful run
+      # - name: Upload screenshots on failure
+      #   uses: actions/upload-artifact@v4
+      #   if: failure()
+      #   with:
+      #     name: cypress-screenshots
+      #     path: cypress/screenshots
+      #     if-no-files-found: ignore
+      # 
+      # - name: Upload videos on failure
+      #   uses: actions/upload-artifact@v4
+      #   if: failure()
+      #   with:
+      #     name: cypress-videos
+      #     path: cypress/videos
+      #     if-no-files-found: ignore 
