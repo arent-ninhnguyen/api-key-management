@@ -283,23 +283,65 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_SUPABASE_URL: 'https://example-ci-test.supabase.co'
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'mock-key-for-ci-testing'
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-key-for-ci-testing'
+      # Reduce logging output - only show errors and warnings
+      CYPRESS_DEBUG: false
+      DEBUG: ''
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'npm'
+      
       - name: Install dependencies
         run: npm ci
+      
       - name: Build Next.js
         run: npm run build
+      
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
           start: npm start
           wait-on: 'http://localhost:3000'
+          browser: chrome
+          record: false
+          config: 'viewportWidth=1280,viewportHeight=800,defaultCommandTimeout=10000'
+          quiet: true
+      
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+      
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
+          
+      - name: Upload Cypress logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-logs
+          path: cypress/logs
+          if-no-files-found: ignore
 ```
 
-The workflow automatically runs tests on pushes to main branches and provides screenshots and videos for any failing tests.
+Key features of this workflow:
+- Runs tests on Chrome browser for consistent results
+- Reduces log output for cleaner CI runs (`quiet: true`)
+- Increases default command timeout to 10 seconds for reliability
+- Only uploads screenshots, videos, and logs when tests fail
+- Uses npm caching to speed up dependency installation
