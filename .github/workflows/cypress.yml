@@ -9,6 +9,11 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    # Add environment variables for the job
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: 'https://example-ci-test.supabase.co'
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-key-for-ci-testing'
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
