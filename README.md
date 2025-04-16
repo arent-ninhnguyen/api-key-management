@@ -218,6 +218,7 @@ The Cypress tests follow the standard Cypress directory structure:
   /e2e              - Test files organized by feature
     - api-keys.cy.js    - Tests for API key management
     - dashboard.cy.js   - Tests for dashboard functionality
+    - overview.cy.js    - Tests for overview page statistics and navigation
     - playground.cy.js  - Tests for API key validation
   /fixtures         - Mock data used in tests
   /support          - Test helpers and custom commands
@@ -247,7 +248,7 @@ npm run test
 
 To run a specific test file:
 ```bash
-npx cypress run --spec "cypress/e2e/playground.cy.js"
+npx cypress run --spec "cypress/e2e/overview.cy.js"
 ```
 
 ### Test Structure
@@ -256,15 +257,40 @@ The test suite is organized as follows:
 
 - **API Key Management Tests** (`api-keys.cy.js`): Test creation, deletion, and validation of API keys
 - **Dashboard Tests** (`dashboard.cy.js`): Test the display of statistics and navigation
+- **Overview Tests** (`overview.cy.js`): Test statistics display, quick action links, navigation, and responsive design
 - **Playground Tests** (`playground.cy.js`): Test validation of API keys and protected content
 
-### Mock Data
+### Mock Data and API Interception
 
-The tests use mock data and custom commands to simulate API interactions:
+The tests use several techniques to simulate API interactions:
 
-- Fixtures in `cypress/fixtures/apiKeys.json` provide consistent test data
-- Custom commands in `cypress/support/commands.js` mock API responses
-- localStorage manipulation is used to test state-dependent features
+- **Custom Commands**: Reusable commands in `cypress/support/commands.js` provide consistent API mocking:
+  ```javascript
+  // Example: Mock API keys data
+  cy.mockApiKeys();
+  ```
+
+- **API Interception**: Cypress intercept patterns target the specific endpoints used by the application:
+  ```javascript
+  cy.intercept('GET', '**/rest/v1/api_keys**', {
+    statusCode: 200,
+    fixture: 'apiKeys.json'
+  }).as('getApiKeys');
+  ```
+
+- **Fixtures**: JSON files in `cypress/fixtures/` provide consistent test data
+- **Authentication**: The `cy.setAuth()` command sets up localStorage tokens for authenticated requests
+
+### Best Practices
+
+When writing tests for this application, follow these guidelines:
+
+1. **Use custom commands** from `commands.js` for consistent API mocking
+2. **Set authentication** with `cy.setAuth()` at the beginning of tests
+3. **Be flexible with selectors** to handle UI changes gracefully
+4. **Verify functionality, not implementation** to create more resilient tests
+5. **Test responsive design** across multiple device sizes
+6. **Mock API responses** to ensure consistent test data
 
 ### GitHub Actions CI Integration
 
