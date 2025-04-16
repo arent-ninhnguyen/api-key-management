@@ -357,7 +357,7 @@ The test suite is organized as follows:
 
 The tests use several techniques to simulate API interactions:
 
-- **Custom Commands**: Reusable commands in `cypress/support/commands.js` provide consistent API mocking:
+- **Custom Commands**: Reusable commands in `commands.js` provide consistent API mocking:
   ```javascript
   // Example: Mock API keys data
   cy.mockApiKeys();
@@ -385,6 +385,56 @@ When writing tests for this application, follow these guidelines:
 5. **Test responsive design** across multiple device sizes
 6. **Mock API responses** to ensure consistent test data
 
+### Running Tests on Cypress Cloud
+
+This project is configured to run tests on Cypress Cloud, providing test analytics, parallelization, and easy debugging.
+
+#### Setup for Local Development
+
+1. **Get the Cypress Record Key**
+
+   Contact your team administrator to get the Cypress Cloud Record Key.
+
+2. **Run with Recording**
+
+   Use the NPM scripts to run tests with recording:
+
+   ```bash
+   # Run all tests and record to Cypress Cloud
+   npm run test:cloud
+   
+   # Run only the overview tests and record
+   npm run test:overview:cloud
+   ```
+
+   Or run manually with:
+
+   ```bash
+   # Record with environment variable
+   CYPRESS_RECORD_KEY=your-key-here cypress run --record
+   
+   # Record with command line flag
+   cypress run --record --key your-key-here
+   ```
+
+#### Cypress Cloud Features
+
+- **Test Analytics**: View test history, performance trends, and failure rates
+- **Parallelization**: Run tests across multiple machines for faster results 
+- **Failure Analysis**: Quickly identify flaky tests and common failure patterns
+- **CI Integration**: Integrated with GitHub Actions workflows
+- **Test Replays**: Watch video recordings of test runs with detailed logs
+
+#### CI/CD Integration
+
+The GitHub Actions workflow is already configured to record test results to Cypress Cloud. To enable this functionality:
+
+1. Add the `CYPRESS_RECORD_KEY` as a repository secret in GitHub
+2. Ensure the workflow file has `record: true` in the Cypress run step
+3. Commits to main, master, or develop branches will automatically trigger test runs that record to Cypress Cloud
+
+For more information on Cypress Cloud, visit [https://www.cypress.io/cloud](https://www.cypress.io/cloud).
+
 ### GitHub Actions CI Integration
 
 This project includes GitHub Actions workflow for continuous integration:
@@ -406,6 +456,8 @@ jobs:
       # Reduce logging output - only show errors and warnings
       CYPRESS_DEBUG: false
       DEBUG: ''
+      # Cypress Cloud recording key
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
     
     steps:
       - name: Checkout
@@ -429,7 +481,7 @@ jobs:
           start: npm start
           wait-on: 'http://localhost:3000'
           browser: chrome
-          record: false
+          record: true
           config: 'viewportWidth=1280,viewportHeight=800,defaultCommandTimeout=10000'
           quiet: true
       
@@ -460,6 +512,7 @@ jobs:
 
 Key features of this workflow:
 - Runs tests on Chrome browser for consistent results
+- Records test results to Cypress Cloud for analytics and debugging
 - Reduces log output for cleaner CI runs (`quiet: true`)
 - Increases default command timeout to 10 seconds for reliability
 - Only uploads screenshots, videos, and logs when tests fail

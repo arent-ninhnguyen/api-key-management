@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "cypress": "cypress open",
-    "test": "cypress run"
+    "test": "cypress run",
+    "test:cloud": "cypress run --record",
+    "test:overview": "cypress run --spec \"cypress/e2e/overview.cy.js\"",
+    "test:overview:cloud": "cypress run --spec \"cypress/e2e/overview.cy.js\" --record"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",

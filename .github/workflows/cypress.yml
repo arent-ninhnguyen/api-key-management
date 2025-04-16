@@ -16,6 +16,8 @@ jobs:
       # Reduce logging output - only show errors and warnings
       CYPRESS_DEBUG: false
       DEBUG: ''
+      # Cypress Cloud recording key
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
     
     steps:
       - name: Checkout
@@ -39,7 +41,7 @@ jobs:
           start: npm start
           wait-on: 'http://localhost:3000'
           browser: chrome
-          record: false
+          record: true
           config: 'viewportWidth=1280,viewportHeight=800,defaultCommandTimeout=10000'
           quiet: true
       
