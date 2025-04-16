@@ -260,6 +260,99 @@ The test suite is organized as follows:
 - **Overview Tests** (`overview.cy.js`): Test statistics display, quick action links, navigation, and responsive design
 - **Playground Tests** (`playground.cy.js`): Test validation of API keys and protected content
 
+### Test Scenarios
+
+#### Overview Page Tests (overview.cy.js)
+
+1. **Page Structure Verification**:
+   - Verifies the page title and main components are displayed
+   - Confirms the grid layout exists
+
+2. **Statistics Display**:
+   - Tests that statistics are displayed correctly based on API data
+   - Verifies "Total API Keys", "Active Keys", and "Total Requests" counters
+   - Validates numeric data is displayed correctly
+
+3. **Navigation Testing**:
+   - Checks that quick action links exist
+   - Verifies clicking links navigates to the correct pages
+
+4. **Responsive Design**:
+   - Tests display on desktop viewport (1280x800)
+   - Tests display on tablet viewport (768x1024)
+   - Tests display on mobile viewport (375x667)
+   - Ensures content remains accessible across all device sizes
+
+#### API Key Management Tests (api-keys.cy.js)
+
+1. **Key Creation**:
+   - Tests opening the create modal
+   - Verifies form input and submission
+   - Validates error handling for invalid inputs
+   - Confirms newly created key appears in the table
+
+2. **Key Editing**:
+   - Tests opening the edit modal with correct initial values
+   - Verifies updating key name and usage limits
+   - Confirms changes are reflected in the UI after editing
+
+3. **Key Deletion**:
+   - Tests opening the delete confirmation modal
+   - Verifies cancellation works properly
+   - Tests successful deletion and UI updates
+   - Validates error handling during deletion
+
+4. **Copy Functionality**:
+   - Tests copying API keys to clipboard
+   - Validates feedback is provided after copying
+
+#### Dashboard Tests (dashboard.cy.js)
+
+1. **Dashboard Loading**:
+   - Tests page load and component rendering
+   - Verifies statistics appear after API data is fetched
+
+2. **Statistics Display**:
+   - Tests correct display of total keys, active keys, and usage
+   - Verifies research plan and limits are displayed
+
+3. **API Key Table**:
+   - Tests table headers are displayed
+   - Verifies key data is displayed correctly
+   - Tests table interactions
+
+4. **Error States**:
+   - Tests appropriate UI is shown when API fails to load
+   - Verifies error messages and recovery options
+
+#### Playground Tests (playground.cy.js)
+
+1. **API Key Validation**:
+   - Tests successful validation of valid keys
+   - Verifies rejection of invalid keys
+   - Tests handling of keys exceeding usage limits
+
+2. **Usage Limit Management**:
+   - Tests display of usage limit exceeded message
+   - Verifies normal operation when under limits
+
+3. **User Interface Feedback**:
+   - Tests loading state during validation
+   - Verifies temporary error messages
+   - Tests form disabling during submission
+   - Validates error message styling
+
+4. **Data Management**:
+   - Tests API key details storage in localStorage
+   - Verifies input clearing after successful validation
+   - Tests graceful handling of API errors
+
+5. **Navigation**:
+   - Tests redirect to protected page after successful validation
+   - Verifies dashboard link navigation
+   - Tests URL maintenance on validation failure
+   - Validates dashboard link display when API limit exceeded
+
 ### Mock Data and API Interception
 
 The tests use several techniques to simulate API interactions:
