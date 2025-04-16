@@ -209,6 +209,22 @@ This project uses Cypress for end-to-end testing. The tests verify the functiona
 - Node.js 14+ installed
 - Project dependencies installed (`npm install`)
 
+### Folder Structure
+
+The Cypress tests follow the standard Cypress directory structure:
+
+```
+/cypress
+  /e2e              - Test files organized by feature
+    - api-keys.cy.js    - Tests for API key management
+    - dashboard.cy.js   - Tests for dashboard functionality
+    - playground.cy.js  - Tests for API key validation
+  /fixtures         - Mock data used in tests
+  /support          - Test helpers and custom commands
+  /screenshots      - Saved automatically when tests fail
+  /videos           - Recordings of test runs
+```
+
 ### Running the Tests
 
 1. **Start the development server in one terminal:**
@@ -229,42 +245,103 @@ To run tests in headless mode:
 npm run test
 ```
 
+To run a specific test file:
+```bash
+npx cypress run --spec "cypress/e2e/playground.cy.js"
+```
+
 ### Test Structure
 
 The test suite is organized as follows:
 
-- **API Key Management Tests**: Test creation, deletion, and validation of API keys
-- **Dashboard Tests**: Test the display of statistics and navigation
-- **Playground Tests**: Test validation of API keys and protected content
+- **API Key Management Tests** (`api-keys.cy.js`): Test creation, deletion, and validation of API keys
+- **Dashboard Tests** (`dashboard.cy.js`): Test the display of statistics and navigation
+- **Playground Tests** (`playground.cy.js`): Test validation of API keys and protected content
 
 ### Mock Data
 
-The tests use mock data and mock Supabase responses to simulate API interactions without requiring a real backend.
+The tests use mock data and custom commands to simulate API interactions:
 
-### CI/CD Integration
+- Fixtures in `cypress/fixtures/apiKeys.json` provide consistent test data
+- Custom commands in `cypress/support/commands.js` mock API responses
+- localStorage manipulation is used to test state-dependent features
 
-To run these tests in a CI/CD pipeline, you can use the following GitHub Actions workflow:
+### GitHub Actions CI Integration
+
+This project includes GitHub Actions workflow for continuous integration:
 
 ```yaml
 name: Cypress Tests
-on: [push]
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: 'https://example-ci-test.supabase.co'
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-key-for-ci-testing'
+      # Reduce logging output - only show errors and warnings
+      CYPRESS_DEBUG: false
+      DEBUG: ''
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'npm'
+      
       - name: Install dependencies
         run: npm ci
+      
       - name: Build Next.js
         run: npm run build
+      
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
           start: npm start
           wait-on: 'http://localhost:3000'
+          browser: chrome
+          record: false
+          config: 'viewportWidth=1280,viewportHeight=800,defaultCommandTimeout=10000'
+          quiet: true
+      
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+      
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
+          
+      - name: Upload Cypress logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-logs
+          path: cypress/logs
+          if-no-files-found: ignore
 ```
+
+Key features of this workflow:
+- Runs tests on Chrome browser for consistent results
+- Reduces log output for cleaner CI runs (`quiet: true`)
+- Increases default command timeout to 10 seconds for reliability
+- Only uploads screenshots, videos, and logs when tests fail
+- Uses npm caching to speed up dependency installation
