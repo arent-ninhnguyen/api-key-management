@@ -14,6 +14,9 @@ A dashboard for managing API keys with Supabase integration.
 ### Overview
 This application provides a comprehensive solution for managing API keys with advanced features for tracking usage, setting limits, and secure validation. It's built with a modern frontend architecture using Next.js and integrates with Supabase for backend functionality.
 
+### E2E Testing with Cypress
+This project uses Cypress for end-to-end testing. The tests verify the functionality of the API key management features, dashboard, and playground. See the [E2E Testing with Cypress](#e2e-testing-with-cypress) section below for details on running tests.
+
 ### Core Components
 
 #### 1. Dashboard
@@ -48,6 +51,7 @@ This application provides a comprehensive solution for managing API keys with ad
 - **Styling**: Tailwind CSS for responsive, utility-first styling
 - **Forms**: Validation with client-side error handling
 - **Animations**: Smooth transitions and loading states
+- **Edge Cases**: Testing for limit conditions, errors, and validation scenarios
 
 #### Backend Integration
 - **Supabase API**: REST endpoints for CRUD operations
@@ -55,39 +59,16 @@ This application provides a comprehensive solution for managing API keys with ad
 - **Data Structure**: Optimized schema for API key management
 - **Error Handling**: Comprehensive error states with user-friendly messages
 
+### E2E Testing with Cypress
+This project uses Cypress for end-to-end testing. The tests verify the functionality of the API key management features, dashboard, and playground. See the [E2E Testing with Cypress](#e2e-testing-with-cypress) section below for details on running tests.
+
 #### Testing
 - **Cypress Tests**: End-to-end testing for all key functionality
 - **Test Coverage**: Dashboard views, API key operations, and playground validation
 - **Mock Data**: Simulated API responses for consistent testing
 - **Edge Cases**: Testing for limit conditions, errors, and validation scenarios
 
-### User Workflows
-
-1. **Creating an API Key**:
-   - User navigates to dashboard
-   - Clicks "Create API Key" button
-   - Enters key name and optional usage limit
-   - Receives generated API key with option to copy
-
-2. **Validating an API Key**:
-   - User navigates to playground
-   - Enters API key in validation field
-   - Submits for validation
-   - Receives success confirmation or error message
-
-3. **Managing Usage Limits**:
-   - User monitors key usage through dashboard
-   - Receives warnings when approaching limits
-   - Can edit keys to adjust limits as needed
-   - Dashboard shows exceeded limits with visual indicators
-
-4. **Deleting an API Key**:
-   - User selects key to delete
-   - Confirms deletion intent
-   - Receives confirmation of successful deletion
-   - Dashboard updates to reflect changes
-
-## Setup Instructions
+### Setup Instructions
 
 ### 1. Supabase Setup
 
@@ -149,14 +130,6 @@ npm install
 npm run dev
 ```
 
-## Authentication
-
-To implement user authentication with Supabase:
-
-1. Enable authentication providers in your Supabase project
-2. Implement sign-in/sign-up flows using Supabase Auth
-3. Update the API key functions to include the user_id in queries
-
 ## Technology Stack
 
 - Next.js
@@ -184,15 +157,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 
@@ -353,38 +317,6 @@ The test suite is organized as follows:
    - Tests URL maintenance on validation failure
    - Validates dashboard link display when API limit exceeded
 
-### Mock Data and API Interception
-
-The tests use several techniques to simulate API interactions:
-
-- **Custom Commands**: Reusable commands in `commands.js` provide consistent API mocking:
-  ```javascript
-  // Example: Mock API keys data
-  cy.mockApiKeys();
-  ```
-
-- **API Interception**: Cypress intercept patterns target the specific endpoints used by the application:
-  ```javascript
-  cy.intercept('GET', '**/rest/v1/api_keys**', {
-    statusCode: 200,
-    fixture: 'apiKeys.json'
-  }).as('getApiKeys');
-  ```
-
-- **Fixtures**: JSON files in `cypress/fixtures/` provide consistent test data
-- **Authentication**: The `cy.setAuth()` command sets up localStorage tokens for authenticated requests
-
-### Best Practices
-
-When writing tests for this application, follow these guidelines:
-
-1. **Use custom commands** from `commands.js` for consistent API mocking
-2. **Set authentication** with `cy.setAuth()` at the beginning of tests
-3. **Be flexible with selectors** to handle UI changes gracefully
-4. **Verify functionality, not implementation** to create more resilient tests
-5. **Test responsive design** across multiple device sizes
-6. **Mock API responses** to ensure consistent test data
-
 ### Running Tests on Cypress Cloud
 
 This project is configured to run tests on Cypress Cloud, providing test analytics, parallelization, and easy debugging.
@@ -416,14 +348,6 @@ This project is configured to run tests on Cypress Cloud, providing test analyti
    # Record with command line flag
    cypress run --record --key your-key-here
    ```
-
-#### Cypress Cloud Features
-
-- **Test Analytics**: View test history, performance trends, and failure rates
-- **Parallelization**: Run tests across multiple machines for faster results 
-- **Failure Analysis**: Quickly identify flaky tests and common failure patterns
-- **CI Integration**: Integrated with GitHub Actions workflows
-- **Test Replays**: Watch video recordings of test runs with detailed logs
 
 #### CI/CD Integration
 
@@ -509,11 +433,3 @@ jobs:
           path: cypress/logs
           if-no-files-found: ignore
 ```
-
-Key features of this workflow:
-- Runs tests on Chrome browser for consistent results
-- Records test results to Cypress Cloud for analytics and debugging
-- Reduces log output for cleaner CI runs (`quiet: true`)
-- Increases default command timeout to 10 seconds for reliability
-- Only uploads screenshots, videos, and logs when tests fail
-- Uses npm caching to speed up dependency installation
