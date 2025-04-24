@@ -13,8 +13,6 @@ A dashboard for managing API keys with Supabase integration.
 
 ### Overview
 This application provides a comprehensive solution for managing API keys with advanced features for tracking usage, setting limits, and secure validation. It's built with a modern frontend architecture using Next.js and integrates with Supabase for backend functionality.
-
-### E2E Testing with Cypress
 This project uses Cypress for end-to-end testing. The tests verify the functionality of the API key management features, dashboard, and playground. See the [E2E Testing with Cypress](#e2e-testing-with-cypress) section below for details on running tests.
 
 ### Core Components
@@ -58,9 +56,6 @@ This project uses Cypress for end-to-end testing. The tests verify the functiona
 - **Authentication**: User-specific data access with row-level security
 - **Data Structure**: Optimized schema for API key management
 - **Error Handling**: Comprehensive error states with user-friendly messages
-
-### E2E Testing with Cypress
-This project uses Cypress for end-to-end testing. The tests verify the functionality of the API key management features, dashboard, and playground. See the [E2E Testing with Cypress](#e2e-testing-with-cypress) section below for details on running tests.
 
 #### Testing
 - **Cypress Tests**: End-to-end testing for all key functionality
@@ -214,15 +209,6 @@ To run a specific test file:
 ```bash
 npx cypress run --spec "cypress/e2e/overview.cy.js"
 ```
-
-### Test Structure
-
-The test suite is organized as follows:
-
-- **API Key Management Tests** (`api-keys.cy.js`): Test creation, deletion, and validation of API keys
-- **Dashboard Tests** (`dashboard.cy.js`): Test the display of statistics and navigation
-- **Overview Tests** (`overview.cy.js`): Test statistics display, quick action links, navigation, and responsive design
-- **Playground Tests** (`playground.cy.js`): Test validation of API keys and protected content
 
 ### Test Scenarios
 
