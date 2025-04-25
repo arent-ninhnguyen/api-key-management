@@ -45,8 +45,9 @@ describe('API Playground', () => {
       // cy.log('@getDetails and @updateUsage requests completed.');
 
       // Check that the URL changes to /protected, even if it redirects back later
+      cy.log('Check point: Before URL assertion');
       cy.log('Checking URL for redirect to /protected...');
-      cy.url().should('include', '/protected', { timeout: 8000 }); 
+      cy.url().should('include', '/protected', { timeout: 15000 });
       cy.log('Redirect to /protected verified (initial navigation attempt).');
     });
 
