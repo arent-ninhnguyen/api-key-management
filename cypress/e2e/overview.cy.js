@@ -9,11 +9,16 @@
  */
 describe('Overview Page', () => {
   beforeEach(() => {
-    // Set authentication token for any API requests
-    cy.setAuth();
-    
-    // Visit the overview page before each test
+    // Log in programmatically before each test
+    cy.login();
+
+    // Mock API calls needed for the overview page 
+    cy.mockApiKeys(); // Alias @getApiKeys is set here
+
+    // Visit the overview page AFTER logging in and setting up mocks
     cy.visit('/');
+    // Wait for the hook's data load
+    cy.wait('@getApiKeys');
   });
 
   it('verifies the page title and main structure', () => {
@@ -28,35 +33,17 @@ describe('Overview Page', () => {
   });
 
   it('displays statistics cards with correct data from API', () => {
-    // Mock API keys data using custom command
-    cy.mockApiKeys();
-    
-    // Also mock the stats endpoint
-    cy.intercept('GET', '**/api/stats', {
-      statusCode: 200,
-      body: {
-        totalKeys: 3,
-        activeKeys: 2,
-        totalUsage: 3900
-      }
-    }).as('getStats');
-    
-    // Reload the page to use our mocked data
-    cy.visit('/');
-    
+    // Data should be loaded from beforeEach
     // First verify the basic elements
     cy.contains('Total API Keys').should('exist');
     cy.contains('Active API Keys').should('exist');
     cy.contains('Total API Requests').should('exist');
     
-    // Allow time for any API calls to complete
-    cy.wait(2000);
-    
-    // Verify statistic values are displayed (using a more flexible selector approach)
-    cy.get('.text-3xl, p.text-2xl, p.font-semibold, [data-cy*="stat"]').should('have.length.at.least', 1);
-    
-    // Try to find the exact elements containing statistics
-    cy.contains(/^[0-9,]+$/).should('exist');
+    // Verify statistic values are displayed (using fixture data)
+    // Assuming apiKeys.json has 2 keys, 2 active, and usage 150 + 3500 = 3650
+    cy.contains('h3', 'Total API Keys').siblings('p').should('contain.text', '2');
+    cy.contains('h3', 'Active API Keys').siblings('p').should('contain.text', '2');
+    cy.contains('h3', 'Total API Requests').siblings('p').should('contain.text', '3,650');
   });
 
   it('displays quick action links for key workflows', () => {

@@ -1,58 +1,52 @@
 describe('Dashboard', () => {
   beforeEach(() => {
-    // Set up auth mock
-    cy.visit('/');
-    cy.setAuth();
+    // Log in programmatically before each test
+    cy.login();
     
-    // Mock API stats
-    cy.intercept('GET', '**/api/stats', {
-      statusCode: 200,
-      body: {
-        totalKeys: 2,
-        activeKeys: 2,
-        totalUsage: 3650
-      }
-    }).as('getStats');
+    // Mock necessary API calls
+    cy.mockApiKeys();
+    cy.mockCreateApiKey(); 
+    cy.mockDeleteApiKey();
     
-    // Visit homepage
-    cy.visit('/');
+    // Visit the dashboard page AFTER logging in and wait for initial data
+    cy.visit('/dashboards');
+    cy.wait('@getApiKeys'); // Wait for the hook's call
   });
 
-  it('loads the homepage', () => {
-    // Basic test to ensure the page loads
-    cy.contains('API Management').should('exist');
+  it('loads the dashboard page correctly', () => {
+    // Basic test to ensure the main page elements load after setup
+    cy.contains('h1', 'Overview').should('be.visible'); // From dashboard page
+    cy.contains('h2', 'API Keys').should('be.visible'); // From dashboard page
   });
 
+  // Remove this test as it duplicates dashboard loading check
+  /*
   it('can navigate to dashboard', () => {
     // Test that navigation works
     cy.contains('Manage API Keys').click();
     cy.url().should('include', '/dashboards');
   });
+  */
 });
 
 // Add new test cases below:
 describe('Dashboard Stats', () => {
   beforeEach(() => {
-    // Set up auth mock
-    cy.visit('/');
-    cy.setAuth();
-    
-    // Instead of mocking a specific endpoint, use the mockApiKeys command
+    // Log in and set up mocks
+    cy.login();
     cy.mockApiKeys();
     
-    // Visit dashboard page directly
+    // Visit dashboard page directly and wait for data
     cy.visit('/dashboards');
+    cy.wait('@getApiKeys');
   });
 
   it('displays the correct stats values', () => {
-    // Wait for the API Keys request to complete - this is the main data source
-    cy.wait('@getApiKeys');
-    
     // Verify API keys are displayed in the table
     cy.contains('Development Key').should('be.visible');
     cy.contains('Production Key').should('be.visible');
     
-    // Verify usage values appear in the UI that match what we see in the screenshot
+    // Verify usage values appear in the UI 
     cy.contains('150').should('be.visible');
     cy.contains('3500').should('be.visible');
     
@@ -62,76 +56,91 @@ describe('Dashboard Stats', () => {
   });
 
   it('shows the API keys table', () => {
-    // Wait only for the API keys request since that's what we're testing
-    cy.wait('@getApiKeys');
-    
-    // Verify the table headers exist in a more flexible way (case-insensitive)
-    cy.contains(/name/i).should('be.visible');
-    cy.contains(/usage/i).should('be.visible');
-    cy.contains(/key/i).should('be.visible');
-    cy.contains(/options/i).should('be.visible');
+    // Verify the table headers exist
+    cy.contains('th', /name/i).should('be.visible');
+    cy.contains('th', /usage/i).should('be.visible');
+    cy.contains('th', /key/i).should('be.visible');
+    cy.contains('th', /options/i).should('be.visible');
     
     // Verify at least two keys are displayed
-    cy.contains('Development Key').should('be.visible');
-    cy.contains('Production Key').should('be.visible');
+    cy.contains('td', 'Development Key').should('be.visible');
+    cy.contains('td', 'Production Key').should('be.visible');
   });
 });
 
 // New test suite for API usage limits
 describe('Dashboard API Usage Limits', () => {
+
   it('shows API usage limit exceeded warnings', () => {
-    cy.visit('/');
-    cy.setAuth();
+    // Log in first
+    cy.login();
     
-    // Set up high API usage through localStorage like we did in the playground tests
-    cy.window().then(win => {
-      // Simulate exceeded API usage by setting usage data in localStorage
-      win.localStorage.setItem('apiUsage', JSON.stringify({
-        count: 100001, // Set count higher than the actual limit (100000)
-        limit: 100000,
-        lastReset: new Date().toISOString()
-      }));
-    });
-    
-    // Use the standard mockApiKeys but don't intercept
-    cy.mockApiKeys();
-    
-    // Visit the dashboard page (which will read the localStorage values)
+    // Define mocked key data where usage exceeds the limit
+    const exceededKeysFixture = [
+      {
+        id: '1',
+        name: 'High Usage Key 1',
+        key: 'ninh-high1',
+        status: 'Active',
+        usage: 50001, 
+        usage_limit: false,
+        limit_value: null,
+        created_at: '2023-09-25T10:00:00Z'
+      },
+      {
+        id: '2',
+        name: 'High Usage Key 2',
+        key: 'ninh-high2',
+        status: 'Active',
+        usage: 50000, 
+        usage_limit: false,
+        limit_value: null,
+        created_at: '2023-08-15T14:30:00Z'
+      }
+    ]; // Total usage = 100001
+
+    // Intercept the API call specifically for this test to return exceeded usage data
+    cy.intercept('GET', '**/rest/v1/api_keys**', {
+      statusCode: 200,
+      body: exceededKeysFixture
+    }).as('getExceededApiKeys');
+
+    // Visit the dashboard page
     cy.visit('/dashboards');
     
-    // Check for usage information
-    cy.contains('API Keys', { timeout: 10000 }).should('exist');
+    // Wait specifically for the intercept defined in this test
+    cy.wait('@getExceededApiKeys');
     
-    // Check if we can see Development and Production keys
-    cy.contains('Development Key').should('exist');
-    cy.contains('Production Key').should('exist');
+    // Verify the API fetch error is NOT shown
+    cy.get('[data-cy="api-key-table-error"]').should('not.exist');
+    cy.contains('Failed to load API keys').should('not.exist');
+
+    // Verify table content IS loaded (with the new mock data)
+    cy.get('table').should('be.visible');
+    cy.contains('td', 'High Usage Key 1').should('exist');
+
+    // Check for the API Limit text within the UsageStats component area
+    cy.contains('API Limit').should('be.visible');
     
-    // Look for any indication of usage or limits in the UI
-    cy.get('body').then($body => {
-      const bodyText = $body.text().toLowerCase();
-      
-      // Success if we find usage information
-      const hasUsageInfo = 
-        bodyText.includes('usage') || 
-        bodyText.includes('limit') ||
-        bodyText.includes('150') || // Usage values
-        bodyText.includes('3500');
-      
-      expect(hasUsageInfo, 'Usage information should be displayed').to.be.true;
-    });
+    // Check that the displayed usage reflects the exceeded state
+    cy.contains('100001/100000 Requests').should('be.visible');
+
+    // Check for the specific warning banner style used in UsageStats.js
+    cy.get('.bg-red-600\\/80').should('be.visible'); 
+    cy.contains('API Usage Limit Exceeded').should('be.visible');
   });
 });
 
 describe('Dashboard UI Components', () => {
   beforeEach(() => {
-    cy.visit('/');
-    cy.setAuth();
-    
-    // Use the mockApiKeys command
+    // Log in and set up mocks
+    cy.login();
     cy.mockApiKeys();
+    cy.mockCreateApiKey(); // Needed for modal interaction
     
-    // Visit dashboards page
+    // Visit dashboards page and wait for data
     cy.visit('/dashboards');
+    cy.wait('@getApiKeys');
   });
 
   it('has create new API key button', () => {
@@ -143,100 +152,44 @@ describe('Dashboard UI Components', () => {
     // Click the + button
     cy.get('button').contains('+').click();
     
-    // Check for modal - using more flexible selectors
-    cy.get('.bg-white, .modal, [role="dialog"]').should('be.visible');
+    // Check for modal using its background/content classes
+    cy.get('.bg-white.dark\\:bg-gray-800.rounded-lg', { timeout: 6000 }).should('be.visible');
     
-    // Don't look for specific text since we might not be able to see the modal title in screenshot
-    // Just check we're in a form context by finding some form element or API key related text
-    cy.get('input, form, [data-cy="api-key-name"]').should('exist');
+    // Check for specific content inside the modal
+    cy.contains('h2', 'Create a new API key').should('be.visible');
+    cy.get('[data-cy="api-key-name"]').should('exist');
     
-    // Close the modal - find any close button
-    cy.get('button[aria-label="Close"], button.close, button:contains("Cancel")').first().click({force: true});
+    // Close the modal - assuming a specific cancel button
+    cy.get('[data-cy="cancel-button"]').click();
+    
   });
 });
 
 describe('Dashboard Error States', () => {
-  it('handles API stats fetch error gracefully', () => {
-    cy.visit('/');
-    cy.setAuth();
+  // No beforeEach needed here as we mock errors specifically per test
+  
+  it('handles API keys fetch error gracefully', () => {
+    // Log in first
+    cy.login();
     
-    // Mock API error for both possible endpoints
-    cy.intercept('GET', '**/api/stats', {
-      statusCode: 500,
-      body: {
-        error: 'Internal Server Error'
-      }
-    }).as('statsError');
-    
-    // Also mock the API keys endpoint with an error
+    // Mock the API keys endpoint with an error
     cy.intercept('GET', '**/rest/v1/api_keys**', {
       statusCode: 500,
-      body: {
-        error: 'Database Error'
-      }
-    }).as('apiKeysError');
-    
-    cy.visit('/dashboards');
-    
-    // Wait briefly to let any error UI render
-    cy.wait(500);
-    
-    // Check the page content for any indication of error or fallback content
-    cy.get('body').should(($body) => {
-      const text = $body.text().toLowerCase();
-      const hasErrorIndication = 
-        text.includes('error') || 
-        text.includes('failed') || 
-        text.includes('unavailable') ||
-        text.includes('404') ||
-        text.includes('500') ||
-        !text.includes('loading'); // If no longer showing loading, should have error state
-        
-      expect(hasErrorIndication).to.be.true;
-    });
-  });
-
-  it('handles API fetch error gracefully', () => {
-    cy.visit('/');
-    cy.setAuth();
-    
-    // Mock API keys endpoint with an error
-    cy.intercept('GET', '**/rest/v1/api_keys*', {
-      statusCode: 500,
-      body: {
-        error: 'Database Error'
-      },
+      body: { message: 'Database Error' },
       delay: 100
     }).as('apiKeysError');
     
     cy.visit('/dashboards');
     
-    // Wait for the error response - this intercept should work because we're using a more flexible pattern
-    cy.wait('@apiKeysError', {timeout: 10000});
+    // Wait for the error response
+    cy.wait('@apiKeysError');
     
-    // Check for any general indication of error state in the UI (simplified)
-    cy.get('body').should('not.contain', 'Development Key');
+    // Check for error indication in the UI by looking for the visible text
+    cy.contains('Failed to load API keys. Please try again later.').should('be.visible');
+    
+    // Also verify the table itself is not rendered
+    cy.get('table').should('not.exist');
   });
 
-  it('verifies content loads after API call', () => {
-    cy.visit('/');
-    cy.setAuth();
-    
-    // Mock API keys with delay to test loading/rendering
-    cy.intercept('GET', '**/rest/v1/api_keys**', {
-      statusCode: 200,
-      fixture: 'apiKeys.json',
-      delay: 1000
-    }).as('delayedApiKeys');
-    
-    cy.visit('/dashboards');
-    
-    // Wait for API call to complete
-    cy.wait('@delayedApiKeys');
-    
-    // Verify content loads properly after API call completes
-    cy.contains('Development Key').should('be.visible');
-    cy.contains('Production Key').should('be.visible');
-    cy.contains('API Keys').should('be.visible');
-  });
+  // Test for successful load is covered by other tests
 }); 

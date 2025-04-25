@@ -1,65 +1,56 @@
 // Main API Key management tests 
 describe('API Key Management', () => {
   beforeEach(() => {
-    // Visit the page and set up mocks first
-    cy.visit('/');
-    
-    // Setup mocks after visit to ensure they work properly
-    cy.setAuth();
-    
-    // Mock API keys data
-    cy.intercept('GET', '**/rest/v1/api_keys**', {
-      statusCode: 200,
-      body: [
-        {
-          id: '1',
-          name: 'Development Key',
-          key: 'ninh-dev123456789',
-          status: 'Active',
-          usage: 150,
-          usage_limit: true,
-          limit_value: 1000,
-          created_at: '2023-09-25T10:00:00Z'
-        },
-        {
-          id: '2',
-          name: 'Production Key',
-          key: 'ninh-prod987654321',
-          status: 'Active',
-          usage: 3500,
-          usage_limit: true,
-          limit_value: 10000,
-          created_at: '2023-08-15T14:30:00Z'
-        }
-      ]
-    }).as('getApiKeys');
-    
-    // Visit the dashboards page
-    cy.visit('/dashboards');
+    // Log in programmatically before each test
+    cy.login();
+
+    // Mock API endpoints. The intercept will remain active.
+    cy.mockApiKeys(); // Alias @getApiKeys is set here
+    cy.mockCreateApiKey();
+    cy.mockDeleteApiKey();
+    // Add mock for update if needed
+
+    // Visit the API keys page
+    cy.visit('/dashboards'); 
+
+    // REMOVE the wait from beforeEach. Let the component handle its own loading.
+    // cy.wait('@getApiKeys');
+  });
+
+  it('should display the API keys table', () => {
+    // Wait for the API call triggered by the component/hook to finish
     cy.wait('@getApiKeys');
+    // Now check table content
+    cy.get('table').should('be.visible');
+    cy.contains('Development Key').should('be.visible');
   });
 
   it('loads the dashboard page', () => {
+    // Wait for the API call triggered by the component/hook to finish
+    cy.wait('@getApiKeys');
     // Basic test to ensure the page loads
-    cy.contains('API Keys').should('exist');
+    cy.contains('h2', 'API Keys').should('be.visible');
   });
 
   it('mocks API calls correctly', () => {
-    // Wait for the API keys request to complete
+    // Wait for the API call triggered by the component/hook to finish
     cy.wait('@getApiKeys');
-    
-    // Check if our intercept is working
+    // Check if our intercept worked by accessing the alias details directly
     cy.get('@getApiKeys').its('response.body').should('have.length', 2);
   });
   
   // Simplified test: Create API key button exists
   it('shows create API key button', () => {
+    // Wait for the API call triggered by the component/hook to finish
+    cy.wait('@getApiKeys');
     // Find the create API key button - using the correct selector
     cy.get('button').contains('+').should('be.visible');
   });
   
   // Simplified test: API key table shows the data
   it('contains API keys in the DOM', () => {
+    // Wait for the API call triggered by the component/hook to finish
+    cy.wait('@getApiKeys');
     // Check data exists in the DOM (not checking visibility)
     cy.contains('Development Key').should('exist');
     cy.contains('Production Key').should('exist');
@@ -67,6 +58,8 @@ describe('API Key Management', () => {
   
   // Simplified test: API key view button works
   it('toggles API key visibility', () => {
+    // Wait for the API call triggered by the component/hook to finish
+    cy.wait('@getApiKeys');
     // Find a row containing the key name
     cy.contains('Development Key')
       .parents('tr')
@@ -83,22 +76,34 @@ describe('API Key Management', () => {
 // API Key Creation tests - testing the creation workflow
 describe('API Key Creation', () => {
   beforeEach(() => {
-    cy.visit('/dashboards')
-    // Wait for initial data to load
-    cy.intercept('GET', '**/rest/v1/api_keys**', { fixture: 'apiKeys.json' }).as('getKeys')
-    cy.wait('@getKeys')
-  })
+    // Log in and set up mocks before each creation test
+    cy.login();
+    cy.mockApiKeys(); 
+    cy.mockCreateApiKey();
+    cy.mockDeleteApiKey();
 
+    // Re-visit the page and wait for initial keys
+    cy.visit('/dashboards');
+    cy.wait('@getApiKeys');
+  });
+  
   it('should open the create API key modal when clicking the create button', () => {
-    // Using more flexible selector to find the create button
-    cy.get('button').contains('+').click()
-    cy.get('.bg-white').should('be.visible')
-    cy.get('[data-cy="api-key-name"]').should('be.visible')
-    // Fix selector to match component's attribute
-    cy.get('[data-cy="usage-limit-value"]').should('exist')
-  })
+    // Wait for the table element to confirm the page loaded
+    // cy.get('table', { timeout: 10000 }).should('be.visible'); // Wait handled by beforeEach
+    
+    // Now find and click the button
+    cy.get('button').contains('+', { timeout: 8000 }).should('be.visible').click();
+    
+    // Assertions for the modal
+    cy.get('.bg-white').should('be.visible'); // Check modal container
+    cy.get('[data-cy="api-key-name"]').should('be.visible');
+    cy.get('[data-cy="usage-limit-value"]').should('exist');
+  });
 
   it('should create a new API key successfully', () => {
+    // Wait for table element
+    cy.get('table', { timeout: 10000 }).should('be.visible');
+
     // Set up clipboard spy properly
     cy.window().then((win) => {
       cy.stub(win.navigator.clipboard, 'writeText').resolves();
@@ -244,11 +249,18 @@ describe('API Key Creation', () => {
 // API Key Deletion tests - testing the deletion workflow
 describe('API Key Deletion', () => {
   beforeEach(() => {
-    cy.visit('/dashboards')
-    // Wait for initial data to load
-    cy.intercept('GET', '**/rest/v1/api_keys**', { fixture: 'apiKeys.json' }).as('getKeys')
-    cy.wait('@getKeys')
-  })
+    // Log in programmatically before each test
+    cy.login();
+
+    // Mock API endpoints. The intercept will remain active.
+    cy.mockApiKeys(); // Alias @getApiKeys is set here
+    cy.mockCreateApiKey();
+    cy.mockDeleteApiKey();
+    
+    // Re-visit the page and wait for initial keys before each deletion test
+    cy.visit('/dashboards');
+    cy.wait('@getApiKeys'); // Wait for the mock from parent beforeEach
+  });
 
   it('should open the delete confirmation modal when clicking delete', () => {
     // Click the delete button for the first API key
@@ -322,7 +334,7 @@ describe('API Key Deletion', () => {
         cy.contains('button', 'Cancel').click()
       } else {
         // If we can't find a specific cancel button, click the non-danger button (usually cancel)
-        cy.get('button:not(.bg-red-500, .bg-red-600, .text-red-500, .text-red-600, .border-red-500, .border-red-600)').last().click()
+        cy.get('button:not(.bg-red-500, .bg-red-600, .text-red-500, .text-red-600)').last().click()
       }
     })
     
@@ -456,11 +468,17 @@ describe('API Key Deletion', () => {
 // API Key Editing tests - testing the editing workflow
 describe('API Key Editing', () => {
   beforeEach(() => {
-    cy.visit('/dashboards')
-    // Wait for initial data to load
-    cy.intercept('GET', '**/rest/v1/api_keys**', { fixture: 'apiKeys.json' }).as('getKeys')
-    cy.wait('@getKeys')
-  })
+    // Log in and set up mocks before each editing test
+    cy.login();
+    cy.mockApiKeys(); 
+    cy.mockCreateApiKey(); // Potentially needed if actions cause re-renders
+    cy.mockDeleteApiKey(); // Potentially needed
+    // cy.mockUpdateApiKey(); // Add if you have a specific mock for PATCH/PUT
+
+    // Re-visit the page and wait for initial keys
+    cy.visit('/dashboards');
+    cy.wait('@getApiKeys');
+  });
 
   it('should open the edit modal with correct data when clicking edit button', () => {
     // Click the edit button for the first API key
@@ -646,12 +664,17 @@ describe('API Key Editing', () => {
 // API Key Copying tests
 describe('API Key Copy Functionality', () => {
   beforeEach(() => {
-    cy.visit('/dashboards')
-    // Wait for initial data to load
-    cy.intercept('GET', '**/rest/v1/api_keys**', { fixture: 'apiKeys.json' }).as('getKeys')
-    cy.wait('@getKeys')
-    
-    // Create stub for clipboard API
+    // Log in and set up mocks
+    cy.login();
+    cy.mockApiKeys(); 
+    cy.mockCreateApiKey();
+    cy.mockDeleteApiKey();
+
+    // Re-visit the page and wait for initial keys
+    cy.visit('/dashboards');
+    cy.wait('@getApiKeys');
+
+    // Keep the clipboard stub setup as it's specific to these tests
     cy.window().then((win) => {
       cy.stub(win.navigator.clipboard, 'writeText').resolves()
     })
